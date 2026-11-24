@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
+import { Route as AuthTotpSetupRouteImport } from './routes/_auth/totp-setup'
 import { Route as AuthVerifyRouteImport } from './routes/_auth/verify'
 
 const AppRoute = AppRouteImport.update({
@@ -39,6 +40,11 @@ const AuthRegisterRoute = AuthRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthTotpSetupRoute = AuthTotpSetupRouteImport.update({
+  id: '/totp-setup',
+  path: '/totp-setup',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -49,12 +55,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/totp-setup': typeof AuthTotpSetupRoute
   '/verify': typeof AuthVerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/totp-setup': typeof AuthTotpSetupRoute
   '/verify': typeof AuthVerifyRoute
 }
 export interface FileRoutesById {
@@ -63,20 +71,22 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/_auth/totp-setup': typeof AuthTotpSetupRoute
   '/_auth/verify': typeof AuthVerifyRoute
   '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/verify'
+  fullPaths: '/' | '/login' | '/register' | '/totp-setup' | '/verify'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/verify'
+  to: '/' | '/login' | '/register' | '/totp-setup' | '/verify'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
     | '/_auth/login'
     | '/_auth/register'
+    | '/_auth/totp-setup'
     | '/_auth/verify'
     | '/_app/'
   fileRoutesById: FileRoutesById
@@ -123,6 +133,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/totp-setup': {
+      id: '/_auth/totp-setup'
+      path: '/totp-setup'
+      fullPath: '/totp-setup'
+      preLoaderRoute: typeof AuthTotpSetupRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/verify': {
       id: '/_auth/verify'
       path: '/verify'
@@ -146,12 +163,14 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface AuthRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthTotpSetupRoute: typeof AuthTotpSetupRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthTotpSetupRoute: AuthTotpSetupRoute,
   AuthVerifyRoute: AuthVerifyRoute,
 }
 

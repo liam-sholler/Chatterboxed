@@ -32,8 +32,11 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
   async function onSubmit(values: RegisterValues) {
     setServerError(null)
     try {
-      const user = await authApi.register(values)
-      authStore.setUser(user)
+      const { challengeId, secret } = await authApi.register(values)
+      authStore.setPendingEnrollment(challengeId, {
+        secret,
+        accountName: values.username,
+      })
       onRegistered()
     } catch (error) {
       setServerError(error instanceof Error ? error.message : 'Something went wrong. Try again.')

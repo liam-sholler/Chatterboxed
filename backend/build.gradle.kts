@@ -22,6 +22,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("io.ktor:ktor-server-websockets")
     implementation("io.ktor:ktor-server-netty")
+    implementation("io.ktor:ktor-server-rate-limit")
+    implementation("io.ktor:ktor-server-cors")
+    implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("io.ktor:ktor-serialization-kotlinx-json")
+    implementation("dev.whyoleg.cryptography:cryptography-core:0.6.0")
+    implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.6.0")
+    implementation("dev.turingcomplete:kotlin-onetimepassword:3.0.0")
 }
 
 kotlin {

@@ -4,6 +4,7 @@ import type {
   LoginRequest,
   LoginResult,
   RegisterPayload,
+  RegisterResponse,
   User,
   VerifyMfaRequest,
 } from './types'
@@ -25,11 +26,17 @@ export const authApi = {
   login: (request: LoginRequest) =>
     api.post<LoginResult>(API_PATHS.auth.login, request),
 
-  /** Creates the account and signs the user in. */
+  /**
+   * Starts sign-up. Nothing is created yet: the response carries the
+   * authenticator-app key and a challenge that `verifyTotp` completes.
+   */
   register: (request: RegisterPayload) =>
-    api.post<User>(API_PATHS.auth.register, request),
+    api.post<RegisterResponse>(API_PATHS.auth.register, request),
 
-  /** Authenticator-app step: completes a pending `mfa_required` challenge. */
+  /**
+   * Authenticator-app step: completes a pending challenge, either a login
+   * (`mfa_required`) or a sign-up (which creates the account).
+   */
   verifyTotp: (challengeId: string, code: string) =>
     api.post<User>(API_PATHS.auth.verifyMfa, {
       challengeId,

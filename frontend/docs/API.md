@@ -52,9 +52,44 @@ Shapes live in `src/features/auth/types.ts`. Edit them there to match the backen
 
 | Endpoint | Request | Response |
 |---|---|---|
-| `POST /auth/register` | `{ username, password }` | `User` (and the session cookie) |
-| `POST /auth/login` | `{ username, password }` | `{ status: 'authenticated', user }` or `{ status: 'mfa_required', challengeId }` |
+| `POST /auth/register` | `{ username, password }` | `{ challengeId, secret }`, or an error status with `{ message }` |
+| `POST /auth/login` | `{ username, password }` | `{ status: 'mfa_required', challengeId }` (or `{ status: 'authenticated', user }`) |
 | `POST /auth/verify-mfa` | `{ challengeId, code }` | `User` (and the session cookie) |
+
+### Sign-up flow
+
+1. `/register` posts `{ username, password }`. The backend validates but does not
+   create the account. It holds the details (password already hashed) and the
+   new key in a pending challenge and returns `{ challengeId, secret }`.
+2. `/totp-setup` shows the key and QR code. Both come from the register response
+   and live in memory only, so a refresh sends the user back to `/register`.
+3. `/verify` posts `{ challengeId, code }` to `/auth/verify-mfa`. On success the
+   backend creates the account, starts the session, and returns the `User`.
+
+`secret` must be plain base32: uppercase `A-Z` and `2-7`, no spaces and no `=`
+padding. The page adds the spacing for display, and the `otpauth://` URI for the
+QR code is built in the browser from it.
+
+### Login flow
+
+1. `/login` posts `{ username, password }`. The backend validates and answers
+   `{ status: 'mfa_required', challengeId }`.
+2. `/verify` posts `{ challengeId, code }` to the same `/auth/verify-mfa`, which
+   starts the session and returns the `User`.
+
+`/auth/verify-mfa` completes both kinds of challenge; the backend knows which
+from the `challengeId`.
+
+### Backend expectations
+
+- Errors: a 4xx status with a `{ message }` body that is safe to show (the client
+  displays it as is). Use 409 for a taken username and 400/422 for validation.
+- Check username availability at register, and again when the account is
+  created at verify, since nothing is reserved in between.
+- Challenges should be single-use, expire (a few minutes), and limit wrong
+  codes. An expired or unknown challenge should say so in `message` so the user
+  knows to start over.
+- Never return the password or its hash.
 
 `User` is `{ id, username }`.
 

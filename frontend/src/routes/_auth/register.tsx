@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   CardContent,
   CardDescription,
@@ -13,7 +13,6 @@ export const Route = createFileRoute('/_auth/register')({
 })
 
 function RegisterPage() {
-  const router = useRouter()
   const navigate = Route.useNavigate()
   const { redirect } = Route.useSearch()
 
@@ -25,10 +24,9 @@ function RegisterPage() {
       </CardHeader>
       <CardContent>
         <RegisterForm
-          onRegistered={() => {
-            if (redirect) router.history.push(redirect)
-            else void navigate({ to: '/' })
-          }}
+          // The account isn't created yet: continue to the authenticator-app
+          // key, then /verify, which signs the user in and honors `redirect`.
+          onRegistered={() => void navigate({ to: '/totp-setup', search: { redirect } })}
         />
       </CardContent>
       <CardFooter className="justify-center gap-1 text-sm text-muted-foreground">

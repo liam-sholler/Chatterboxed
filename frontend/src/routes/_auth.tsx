@@ -26,7 +26,10 @@ function AuthLayout() {
         <ThemeToggle />
       </div>
       <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
-        <span className="text-2xl font-bold tracking-tight">{APP_NAME}</span>
+        <span className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+          <img src="/chatterbot.svg" alt="" className="h-8 w-auto" />
+          {APP_NAME}
+        </span>
         <Card className="w-full max-w-sm">
           <Outlet />
         </Card>
