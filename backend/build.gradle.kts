@@ -6,7 +6,7 @@ plugins {
 }
 
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
+    mainClass.set("org.chatter.ApplicationKt")
 }
 
 group = "org.chatter"
@@ -29,6 +29,7 @@ dependencies {
     implementation("dev.whyoleg.cryptography:cryptography-core:0.6.0")
     implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.6.0")
     implementation("dev.turingcomplete:kotlin-onetimepassword:3.0.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
 }
 
 kotlin {

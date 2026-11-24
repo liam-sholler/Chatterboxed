@@ -1,31 +1,33 @@
 package org.chatter.services
 
 import dev.turingcomplete.kotlinonetimepassword.GoogleAuthenticator
-import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
-import dev.turingcomplete.kotlinonetimepassword.TimeBasedOneTimePasswordConfig
-import dev.turingcomplete.kotlinonetimepassword.TimeBasedOneTimePasswordGenerator
+import dev.whyoleg.cryptography.CryptographyProvider
+import dev.whyoleg.cryptography.algorithms.SHA512
+import dev.whyoleg.cryptography.operations.Hasher
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.bytestring.encodeToByteString
 import org.chatter.routing.ApiError
 import org.chatter.routing.routes.MFARequest
 import org.chatter.routing.routes.RegisterRequest
 import org.chatter.routing.routes.RegisterResponse
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 private data class PendingVerification(
     val username: String,
-    val password: String,
+    val password: ByteString,
     val secret: ByteArray,
     val expiresAt: Instant,
 )
 
 object AuthService {
     private val challenges: ConcurrentHashMap<String, PendingVerification> = ConcurrentHashMap()
+    private val hasher: Hasher = CryptographyProvider.Default.get(SHA512).hasher()
 
     /**
      * Attempts to register a user to Chatterboxed. Automatically responds to the API call.
@@ -43,7 +45,7 @@ object AuthService {
 
         challenges[challengeId] = PendingVerification(
             request.username,
-            request.password,
+            hasher.hash(request.password.encodeToByteString()),
             secret,
             Clock.System.now().plus(5.minutes)
         )

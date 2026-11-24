@@ -9,23 +9,23 @@ All shared constants live here. Import them instead of repeating literals.
 | `APP_NAME` | `Chatterboxed` | Product name for UI copy |
 | `SERVER_PROTOCOL` | `http` | Backend protocol |
 | `SERVER_HOST` | `localhost` | Backend host |
-| `SERVER_PORT` | `8080` | Backend port (empty = no explicit port) |
-| `API_BASE_URL` | `http://localhost:8080` | Built from the three above |
+| `SHARED_SERVER_PORT` | `9943` | Backend port (empty = no explicit port) |
+| `API_BASE_URL` | `http://localhost:9943` | Built from the three above |
 | `API_TIMEOUT_MS` | `10000` | Per-request timeout |
 | `API_PATHS` | see file | Every backend endpoint the frontend calls |
 
 ### Overriding the server
 
-Copy `.env.example` to `.env.local` (git-ignored) and edit:
+Copy `.env.example` to `.env.local` (git-ignored, keep in repository root) and edit:
 
 ```
 VITE_SERVER_PROTOCOL=http
 VITE_SERVER_HOST=localhost
-VITE_SERVER_PORT=8080
+SHARED_SERVER_PORT=8080
 ```
 
 Restart `npm run dev` after changing it. For a production host on the default
-port, set `VITE_SERVER_PORT=` (empty) so no port is appended.
+port, set `SHARED_SERVER_PORT=` (empty) so no port is appended.
 
 ## API client: `src/lib/api.ts`
 

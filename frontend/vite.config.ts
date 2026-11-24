@@ -17,4 +17,6 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  envDir: '..',
+  envPrefix: ['VITE_', 'SHARED_'],
 })
