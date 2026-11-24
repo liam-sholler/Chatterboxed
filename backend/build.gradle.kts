@@ -26,10 +26,13 @@ dependencies {
     implementation("io.ktor:ktor-server-cors")
     implementation("io.ktor:ktor-server-content-negotiation")
     implementation("io.ktor:ktor-serialization-kotlinx-json")
+    implementation("io.ktor:ktor-server-status-pages")
     implementation("dev.whyoleg.cryptography:cryptography-core:0.6.0")
     implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.6.0")
     implementation("dev.turingcomplete:kotlin-onetimepassword:3.0.0")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
+    implementation("org.jobrunr:jobrunr:9.0.5")
+    implementation("org.jobrunr:jobrunr-kotlin-support:9.0.5")
 }
 
 kotlin {

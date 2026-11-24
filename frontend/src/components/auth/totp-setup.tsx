@@ -77,7 +77,7 @@ export function TotpSetup({ secret, accountName, onContinue }: TotpSetupProps) {
     <div className="flex flex-col items-center gap-6">
       {/* Scanners need dark-on-light, so this tile stays white (and the
           modules black) in both themes; there is no semantic token for that. */}
-      <div className="flex size-48 items-center justify-center rounded-2xl bg-white">
+      <div className="flex size-48 items-center justify-center rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.4)]">
         {otpauthUri ? (
           <QrCode value={otpauthUri} />
         ) : (

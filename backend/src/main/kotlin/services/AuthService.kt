@@ -13,6 +13,8 @@ import org.chatter.routing.ApiError
 import org.chatter.routing.routes.MFARequest
 import org.chatter.routing.routes.RegisterRequest
 import org.chatter.routing.routes.RegisterResponse
+import org.jobrunr.scheduling.BackgroundJob
+import org.jobrunr.scheduling.cron.Cron
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -25,7 +27,7 @@ private data class PendingVerification(
     val expiresAt: Instant,
 )
 
-object AuthService {
+object AuthService : Service {
     private val challenges: ConcurrentHashMap<String, PendingVerification> = ConcurrentHashMap()
     private val hasher: Hasher = CryptographyProvider.Default.get(SHA512).hasher()
 
@@ -80,6 +82,13 @@ object AuthService {
         }
 
         call.respond(HttpStatusCode.OK,"LGTM") // TODO: Return a `User` (get or create from DB)
+        challenges.remove(request.challengeId, challenge)
         return true
+    }
+
+    override fun init() {
+        BackgroundJob.scheduleRecurrently("cleanup-old-mfa-challenges", Cron.every5minutes()) {
+            challenges.values.removeIf { it.expiresAt < Clock.System.now() }
+        }
     }
 }

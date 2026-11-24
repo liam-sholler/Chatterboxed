@@ -14,23 +14,38 @@ import io.ktor.server.response.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.uri
+import io.ktor.utils.io.CancellationException
 
 // Chatterbox
 import org.chatter.routing.registerLimits
 import org.chatter.routing.registerRoutes
+import org.chatter.services.Services
+
+// JobRunr
+import org.jobrunr.configuration.JobRunr
+import org.jobrunr.storage.InMemoryStorageProvider
 
 fun main() {
     Constants.parse()
+    JobRunr.configure()
+        .useStorageProvider(InMemoryStorageProvider()) // TODO: Hook up to a DB
+        .useBackgroundJobServer()
+        .initialize()
+    Services.initAll()
+
     embeddedServer(Netty, port = Constants.SHARED_SERVER_PORT, module = Application::module)
         .start(wait = true)
 }
 
 fun Application.module() {
     println("${Constants.PROJECT_TITLE} starting up...")
-    println("${Constants.FRONTEND_URLS}")
 
     install(ContentNegotiation) {
         json(Json {
@@ -61,6 +76,16 @@ fun Application.module() {
         allowCredentials = true
     }
 
+    install(StatusPages) {
+        exception<BadRequestException> { call, _ ->
+            call.respond(HttpStatusCode.BadRequest, "Invalid request")
+        }
+        exception<Throwable> { call, cause ->
+            if (cause is CancellationException) throw cause
+            println("Unhandled exception on ${call.request.uri}: ${cause.toString()}")
+            call.respond(HttpStatusCode.InternalServerError, "Internal server error. Your request could not be completed. Try again?")
+        }
+    }
 
     routing {
         registerRoutes()
