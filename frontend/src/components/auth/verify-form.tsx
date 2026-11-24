@@ -7,8 +7,8 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
-import { authApi } from './api'
-import { authStore } from './auth-store'
+import { authApi } from '@/features/auth/api'
+import { authStore } from '@/features/auth/auth-store'
 
 const CODE_LENGTH = 6
 

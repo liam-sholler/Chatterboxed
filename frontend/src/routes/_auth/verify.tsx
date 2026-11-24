@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { authStore } from '@/features/auth/auth-store'
-import { VerifyForm } from '@/features/auth/verify-form'
+import { VerifyForm } from '@/components/auth/verify-form'
 
 export const Route = createFileRoute('/_auth/verify')({
   // Only reachable mid-login. A refresh drops the in-memory challenge, so the

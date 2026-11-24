@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { RegisterForm } from '@/features/auth/register-form'
+import { RegisterForm } from '@/components/auth/register-form'
 
 export const Route = createFileRoute('/_auth/register')({
   component: RegisterPage,

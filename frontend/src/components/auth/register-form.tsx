@@ -2,39 +2,39 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { authApi } from './api'
-import { authStore } from './auth-store'
-import { loginSchema, type LoginValues } from './schemas'
+import { authApi } from '@/features/auth/api'
+import { authStore } from '@/features/auth/auth-store'
+import { PASSWORD_MIN, registerSchema, type RegisterValues } from '@/features/auth/schemas'
 
-interface LoginFormProps {
-  onAuthenticated: () => void
-  onMfaRequired: () => void
+interface RegisterFormProps {
+  onRegistered: () => void
 }
 
-export function LoginForm({ onAuthenticated, onMfaRequired }: LoginFormProps) {
+export function RegisterForm({ onRegistered }: RegisterFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: { username: '', password: '' },
   })
 
-  async function onSubmit(values: LoginValues) {
+  async function onSubmit(values: RegisterValues) {
     setServerError(null)
     try {
-      const result = await authApi.login(values)
-      if (result.status === 'mfa_required') {
-        authStore.setPendingChallenge(result.challengeId)
-        onMfaRequired()
-      } else {
-        authStore.setUser(result.user)
-        onAuthenticated()
-      }
+      const user = await authApi.register(values)
+      authStore.setUser(user)
+      onRegistered()
     } catch (error) {
       setServerError(error instanceof Error ? error.message : 'Something went wrong. Try again.')
     }
@@ -61,17 +61,18 @@ export function LoginForm({ onAuthenticated, onMfaRequired }: LoginFormProps) {
           <Input
             id="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             aria-invalid={errors.password ? true : undefined}
             {...register('password')}
           />
+          <FieldDescription>At least {PASSWORD_MIN} characters.</FieldDescription>
           <FieldError errors={[errors.password]} />
         </Field>
 
         {serverError && <FieldError>{serverError}</FieldError>}
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? 'Creating account…' : 'Create account'}
         </Button>
       </FieldGroup>
     </form>

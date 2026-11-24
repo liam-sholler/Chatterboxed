@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { LoginForm } from '@/features/auth/login-form'
+import { LoginForm } from '@/components/auth/login-form'
 
 export const Route = createFileRoute('/_auth/login')({
   component: LoginPage,

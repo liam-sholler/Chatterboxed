@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { Card } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { APP_NAME } from '@/lib/config'
-import { AuthBackdrop } from '@/features/auth/auth-backdrop'
+import { AuthBackdrop } from '@/components/auth/auth-backdrop'
 import { safeRedirect } from '@/features/auth/safe-redirect'
 
 // Public-only layout: signed-in users are sent to the app.
@@ -26,10 +26,7 @@ function AuthLayout() {
         <ThemeToggle />
       </div>
       <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
-        <span className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-          <span aria-hidden="true" className="size-2.5 rounded-full bg-success" />
-          {APP_NAME}
-        </span>
+        <span className="text-2xl font-bold tracking-tight">{APP_NAME}</span>
         <Card className="w-full max-w-sm">
           <Outlet />
         </Card>
