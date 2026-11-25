@@ -27,6 +27,7 @@ object Constants {
     const val PROJECT_TITLE = "Chatterboxed"
     var SHARED_SERVER_PORT: Int = 8080
     var FRONTEND_URLS: List<String> = emptyList()
+    var PASSWORD_PEPPER: String = ""
 
     fun parse() {
         val file = loadEnv()
@@ -36,5 +37,7 @@ object Constants {
             ?: error("SHARED_SERVER_PORT missing or not a number")
         FRONTEND_URLS = get("FRONTEND_URLS").orEmpty()
             .split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        PASSWORD_PEPPER = get("PASSWORD_PEPPER")
+            ?: error("PASSWORD_PEPPER is missing. Please set it.")
     }
 }

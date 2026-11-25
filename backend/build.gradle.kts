@@ -33,6 +33,7 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
     implementation("org.jobrunr:jobrunr:9.0.5")
     implementation("org.jobrunr:jobrunr-kotlin-support:9.0.5")
+    implementation("com.password4j:password4j:1.8.4")
 }
 
 kotlin {

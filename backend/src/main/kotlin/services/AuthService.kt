@@ -1,5 +1,7 @@
 package org.chatter.services
 
+import com.password4j.Hash
+import com.password4j.Password
 import dev.turingcomplete.kotlinonetimepassword.GoogleAuthenticator
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA512
@@ -7,8 +9,7 @@ import dev.whyoleg.cryptography.operations.Hasher
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.encodeToByteString
+import org.chatter.Constants
 import org.chatter.routing.ApiError
 import org.chatter.routing.routes.MFARequest
 import org.chatter.routing.routes.RegisterRequest
@@ -22,7 +23,7 @@ import kotlin.time.Instant
 
 private data class PendingVerification(
     val username: String,
-    val password: ByteString,
+    val password: Hash?,
     val secret: ByteArray,
     val expiresAt: Instant,
 )
@@ -47,7 +48,7 @@ object AuthService : Service {
 
         challenges[challengeId] = PendingVerification(
             request.username,
-            hasher.hash(request.password.encodeToByteString()),
+            Password.hash(request.password).addRandomSalt(16).addPepper(Constants.PASSWORD_PEPPER).withScrypt(),
             secret,
             Clock.System.now().plus(5.minutes)
         )
@@ -81,8 +82,13 @@ object AuthService : Service {
             return false
         }
 
-        call.respond(HttpStatusCode.OK,"LGTM") // TODO: Return a `User` (get or create from DB)
-        challenges.remove(request.challengeId, challenge)
+        // If remove returns false, another request already used it, so treat this one as a replay.
+        if (!challenges.remove(request.challengeId, challenge)) {
+            call.respond(HttpStatusCode.Unauthorized, ApiError.oldChallenge())
+            return false
+        }
+
+        call.respond(HttpStatusCode.OK, "LGTM") // TODO: Return a `User` (get or create from DB. the user could in theory be taken by now, so we will have to handle an error later)
         return true
     }
 
