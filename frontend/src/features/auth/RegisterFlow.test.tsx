@@ -38,7 +38,8 @@ async function registerAndReachCode(user: ReturnType<typeof userEvent.setup>) {
 // authStore is a module singleton; don't let one test's session leak into the next.
 afterEach(() => authStore.signOut())
 
-describe('register + MFA flow', () => {
+// First test pays for cold route-chunk loading; a 5s timeout there leaks into later tests.
+describe('register + MFA flow', { timeout: 15_000 }, () => {
   it('happy path: register, see the key, enter the code, land signed in', async () => {
     const user = await renderApp()
     await fillRegister(user)

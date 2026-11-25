@@ -6,7 +6,6 @@
   ],
   /* Matches tsconfig.app.json; keep in sync */ 
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
