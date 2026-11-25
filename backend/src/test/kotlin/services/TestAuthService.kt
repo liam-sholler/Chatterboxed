@@ -41,9 +41,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientCon
 /**
  * Black-box tests for AuthService: everything goes through HTTP, exactly like a real client
  * (or attacker) would see it. Nothing here inspects the challenge map, hashes, or other internals.
- *
- * Requires one test seam in AuthService:  `internal var clock: Clock = Clock.System`
- * (and using `clock.now()` instead of `Clock.System.now()`), so expiry can be tested without waiting.
  */
 class AuthServiceTest {
 
