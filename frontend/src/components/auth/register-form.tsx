@@ -10,6 +10,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { ApiError } from '@/lib/api'
 import { authApi } from '@/features/auth/api'
 import { authStore } from '@/features/auth/auth-store'
 import { PASSWORD_MIN, registerSchema, type RegisterValues } from '@/features/auth/schemas'
@@ -23,6 +24,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -39,6 +41,10 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
       })
       onRegistered()
     } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setError('username', { message: error.message }, { shouldFocus: true })
+        return
+      }
       setServerError(error instanceof Error ? error.message : 'Something went wrong. Try again.')
     }
   }
@@ -54,9 +60,10 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
             autoCapitalize="none"
             spellCheck={false}
             aria-invalid={errors.username ? true : undefined}
+            aria-describedby={errors.username ? 'username-error' : undefined}
             {...register('username')}
           />
-          <FieldError errors={[errors.username]} />
+          <FieldError id="username-error" errors={[errors.username]} />
         </Field>
 
         <Field data-invalid={errors.password ? true : undefined}>

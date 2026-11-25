@@ -16,9 +16,15 @@ interface VerifyFormProps {
   challengeId: string
   onVerified: () => void
   onCancel: () => void
+  cancelLabel?: string
 }
 
-export function VerifyForm({ challengeId, onVerified, onCancel }: VerifyFormProps) {
+export function VerifyForm({
+  challengeId,
+  onVerified,
+  onCancel,
+  cancelLabel = 'Use a different account',
+}: VerifyFormProps) {
   const [code, setCode] = useState('')
   const [pending, setPending] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -61,7 +67,7 @@ export function VerifyForm({ challengeId, onVerified, onCancel }: VerifyFormProp
       {serverError && <FieldError>{serverError}</FieldError>}
 
       <Button type="button" variant="ghost" onClick={onCancel} disabled={pending}>
-        Use a different account
+        {cancelLabel}
       </Button>
     </div>
   )

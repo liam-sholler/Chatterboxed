@@ -16,7 +16,8 @@ export const Route = createFileRoute('/_auth/verify')({
     if (!challengeId) {
       throw redirect({ to: '/login', search: { redirect: search.redirect } })
     }
-    return { challengeId }
+    // Sign-up also lands here; it has a pending enrollment, login doesn't.
+    return { challengeId, isSignUp: !!context.auth.getState().pendingEnrollment }
   },
   component: VerifyPage,
 })
@@ -24,7 +25,7 @@ export const Route = createFileRoute('/_auth/verify')({
 function VerifyPage() {
   const router = useRouter()
   const navigate = Route.useNavigate()
-  const { challengeId } = Route.useRouteContext()
+  const { challengeId, isSignUp } = Route.useRouteContext()
   const { redirect: redirectTo } = Route.useSearch()
 
   return (
@@ -42,9 +43,10 @@ function VerifyPage() {
             if (redirectTo) router.history.push(redirectTo)
             else void navigate({ to: '/' })
           }}
+          cancelLabel={isSignUp ? 'Start over' : undefined}
           onCancel={() => {
             authStore.setPendingChallenge(null)
-            void navigate({ to: '/login', search: { redirect: redirectTo } })
+            void navigate({ to: isSignUp ? '/register' : '/login', search: { redirect: redirectTo } })
           }}
         />
       </CardContent>
