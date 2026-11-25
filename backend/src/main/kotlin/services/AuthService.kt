@@ -9,6 +9,8 @@ import dev.whyoleg.cryptography.operations.Hasher
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.chatter.Constants
 import org.chatter.routing.ApiError
 import org.chatter.routing.routes.MFARequest
@@ -26,11 +28,15 @@ private data class PendingVerification(
     val password: Hash?,
     val secret: ByteArray,
     val expiresAt: Instant,
+    var attempts: Int = 0
 )
+
+private const val MAX_WRONG_ATTEMPTS = 5
 
 object AuthService : Service {
     private val challenges: ConcurrentHashMap<String, PendingVerification> = ConcurrentHashMap()
     private val hasher: Hasher = CryptographyProvider.Default.get(SHA512).hasher()
+    internal var clock: Clock = Clock.System
 
     /**
      * Attempts to register a user to Chatterboxed. Automatically responds to the API call.
@@ -46,11 +52,15 @@ object AuthService : Service {
         val challengeId = GoogleAuthenticator.createSecureRandomSecretAsByteArray().decodeToString()
         val secret = GoogleAuthenticator.createSecureRandomSecretAsByteArray()
 
+        val hash = withContext(Dispatchers.Default) {
+            Password.hash(request.password).addRandomSalt(16).addPepper(Constants.PASSWORD_PEPPER).withScrypt()
+        }
+
         challenges[challengeId] = PendingVerification(
             request.username,
-            Password.hash(request.password).addRandomSalt(16).addPepper(Constants.PASSWORD_PEPPER).withScrypt(),
+            hash,
             secret,
-            Clock.System.now().plus(5.minutes)
+            clock.now().plus(5.minutes)
         )
 
         call.respond(HttpStatusCode.OK,RegisterResponse(challengeId, secret.decodeToString()))
@@ -71,7 +81,14 @@ object AuthService : Service {
             return false
         }
 
-        if (Clock.System.now() > challenge.expiresAt) {
+        challenge.attempts += 1
+        if (challenge.attempts > MAX_WRONG_ATTEMPTS) {
+            call.respond(HttpStatusCode.Unauthorized, ApiError.oldChallenge())
+            challenges.remove(request.challengeId, challenge)
+            return false
+        }
+
+        if (clock.now() > challenge.expiresAt) {
             challenges.remove(request.challengeId, challenge)
             call.respond(HttpStatusCode.Unauthorized,ApiError.oldChallenge())
             return false
@@ -94,7 +111,7 @@ object AuthService : Service {
 
     override fun init() {
         BackgroundJob.scheduleRecurrently("cleanup-old-mfa-challenges", Cron.every5minutes()) {
-            challenges.values.removeIf { it.expiresAt < Clock.System.now() }
+            challenges.values.removeIf { it.expiresAt < clock.now() }
         }
     }
 }
